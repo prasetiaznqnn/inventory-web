@@ -5,7 +5,7 @@ require "../BackEnd/check_role.php"; // Pastikan jalur file benar
 include "../header.php";
 
 ?>
-?>
+
 <main>
     <div class="container-fluid">
         <h1 class="mt-4">User</h1>
@@ -23,7 +23,7 @@ include "../header.php";
                             <tr>
                                 <th>NO</th>
                                 <th>Nama</th>
-                                <th>Email</th>
+                                <!-- <th>Email</th> -->
                             </tr>
                         </thead>
                         <tbody>
@@ -33,13 +33,12 @@ include "../header.php";
                             $i = 1;
                             while ($data = mysqli_fetch_array($result)) {
                                 $username = $data['username'];
-                                $email = $data['email'];
+                                // $email = $data['email'];
 
                             ?>
                                 <tr>
                                     <td><?= $i++; ?></td>
-                                    <td><?= $username; ?></td>
-                                    <td><?= $email; ?></td>
+                                    <td><?= $username; ?></td>      
                                 </tr>
                             <?php
                             };

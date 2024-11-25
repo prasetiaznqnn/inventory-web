@@ -1,20 +1,10 @@
 <?php
-$title = "Data Barang | Elastomix"; 
-
-session_start();
-
-// Cek apakah pengguna sudah login dan memiliki role 'user'
-if (!isset($_SESSION['id']) || $_SESSION['role'] != 'user') {
-    // Jika belum login atau bukan user, arahkan ke halaman login
-    header("Location: ../index.php");
-    exit();
-}
-
-// Proses selanjutnya jika sudah login
+$title = "DashBoard | Elastomix";
 require "../BackEnd/function.php";
 require "../header.php";
-
+require "../BackEnd/check_role.php"; // Pastikan file ini dipanggil
 ?>
+
 <main>
     <div class="container-fluid">
         <h1 class="mt-4">List Data Item</h1>
@@ -38,14 +28,16 @@ require "../header.php";
                         </thead>
                         <tbody>
                             <?php
-                            $ambilsemuastock = mysqli_query($conn, "SELECT master_barang.kode_barang, master_barang.nama_barang, master_barang.jenis_barang, 
-                            COALESCE(SUM(barang_masuk.jumlah_masuk), 0) AS jumlah_masuk, 
-                            COALESCE(SUM(CASE WHEN barang_keluar.status_approve = 'approved' THEN barang_keluar.jumlah_keluar ELSE 0 END), 0) AS jumlah_keluar, 
-                            master_barang.jumlah AS stok 
-                            FROM master_barang 
-                            LEFT JOIN barang_masuk ON master_barang.kode_barang = barang_masuk.kode_barang 
-                            LEFT JOIN barang_keluar ON master_barang.kode_barang = barang_keluar.kode_barang 
-                            GROUP BY master_barang.kode_barang
+                            $ambilsemuastock = mysqli_query($conn, "
+                                SELECT 
+                                    master_barang.kode_barang, 
+                                    master_barang.nama_barang, 
+                                    master_barang.jenis_barang, 
+                                    COALESCE((SELECT SUM(jumlah_masuk) FROM barang_masuk WHERE barang_masuk.kode_barang = master_barang.kode_barang), 0) AS jumlah_masuk, 
+                                    COALESCE((SELECT SUM(jumlah_keluar) FROM barang_keluar WHERE barang_keluar.kode_barang = master_barang.kode_barang AND barang_keluar.status_approve = 'approved'), 0) AS jumlah_keluar, 
+                                    (COALESCE((SELECT SUM(jumlah_masuk) FROM barang_masuk WHERE barang_masuk.kode_barang = master_barang.kode_barang), 0) - 
+                                    COALESCE((SELECT SUM(jumlah_keluar) FROM barang_keluar WHERE barang_keluar.kode_barang = master_barang.kode_barang AND barang_keluar.status_approve = 'approved'), 0)) AS stok 
+                                FROM master_barang
                             ");
                             $i = 1;
                             while ($data = mysqli_fetch_array($ambilsemuastock)) {
@@ -76,5 +68,8 @@ require "../header.php";
     </div>
 </main>
 
+<!-- Tambahkan bagian untuk menampilkan chart atau view lainnya -->
 
-<?php include "../footer.php"; ?>
+<?php
+require "../footer.php"
+?>
